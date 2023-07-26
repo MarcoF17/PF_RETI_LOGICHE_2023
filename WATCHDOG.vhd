@@ -85,57 +85,39 @@ begin
 	
 
 
-	TIN <= (STWMIN(0) and COUNTER_OUT(0)) and
-			 (STWMIN(1) and COUNTER_OUT(1)) and
-			 (STWMIN(2) and COUNTER_OUT(2)) and
-			 (STWMIN(3) and COUNTER_OUT(3)) and
-			 (STWMIN(4) and COUNTER_OUT(4)) and
-			 (STWMIN(5) and COUNTER_OUT(5)) and
-			 (STWMIN(6) and COUNTER_OUT(6)) and
-			 (STWMIN(7) and COUNTER_OUT(7)) and
-			 (STWMIN(8) and COUNTER_OUT(8)) and
-			 (STWMIN(9) and COUNTER_OUT(9)) and
-			 (STWMIN(10) and COUNTER_OUT(10)) and
-			 (STWMIN(11) and COUNTER_OUT(11)) and
-			 (STWMIN(12) and COUNTER_OUT(12)) and
-			 (STWMIN(13) and COUNTER_OUT(13)) and
-			 (STWMIN(14) and COUNTER_OUT(14)) and
-			 (STWMIN(15) and COUNTER_OUT(15));
-			 
-	NMI <= (STNMI(0) and COUNTER_OUT(0)) and
-			 (STNMI(1) and COUNTER_OUT(1)) and
-			 (STNMI(2) and COUNTER_OUT(2)) and
-			 (STNMI(3) and COUNTER_OUT(3)) and
-			 (STNMI(4) and COUNTER_OUT(4)) and
-			 (STNMI(5) and COUNTER_OUT(5)) and
-			 (STNMI(6) and COUNTER_OUT(6)) and
-			 (STNMI(7) and COUNTER_OUT(7)) and
-			 (STNMI(8) and COUNTER_OUT(8)) and
-			 (STNMI(9) and COUNTER_OUT(9)) and
-			 (STNMI(10) and COUNTER_OUT(10)) and
-			 (STNMI(11) and COUNTER_OUT(11)) and
-			 (STNMI(12) and COUNTER_OUT(12)) and
-			 (STNMI(13) and COUNTER_OUT(13)) and
-			 (STNMI(14) and COUNTER_OUT(14)) and
-			 (STNMI(15) and COUNTER_OUT(15));
-			 
-	RESET <= (CLEAR and (not TOUT)) or
-			   ((STWMAX(0) and COUNTER_OUT(0)) and
-				 (STWMAX(1) and COUNTER_OUT(1)) and
-				 (STWMAX(2) and COUNTER_OUT(2)) and
-				 (STWMAX(3) and COUNTER_OUT(3)) and
-				 (STWMAX(4) and COUNTER_OUT(4)) and
-				 (STWMAX(5) and COUNTER_OUT(5)) and
-				 (STWMAX(6) and COUNTER_OUT(6)) and
-				 (STWMAX(7) and COUNTER_OUT(7)) and
-				 (STWMAX(8) and COUNTER_OUT(8)) and
-				 (STWMAX(9) and COUNTER_OUT(8)) and
-				 (STWMAX(10) and COUNTER_OUT(9)) and
-				 (STWMAX(11) and COUNTER_OUT(10)) and
-				 (STWMAX(12) and COUNTER_OUT(11)) and
-				 (STWMAX(13) and COUNTER_OUT(12)) and
-				 (STWMAX(14) and COUNTER_OUT(13)) and
-				 (STWMAX(15) and COUNTER_OUT(14)));	
+	COUNTER_VERIFY: process(COUNTER_OUT, CLEAR, TOUT)
+		begin
+			if(STWMIN = COUNTER_OUT) then
+				TIN <= '1';
+			else
+				TIN <= '0';
+			end if;
+			
+			if(STNMI = COUNTER_OUT) then
+				NMI <= '1';
+			else
+				NMI <= '0';
+			end if;
+			
+			if(STWMAX = COUNTER_OUT) then
+				RESET <= '1';
+			else
+				if(CLEAR = '1' and TOUT = '0') then
+					RESET <= '1';
+				else
+					RESET <= '0';
+				end if;
+			end if;
+		end process;
+		
+				
+	INIT_RST: process(RST)
+		begin
+			if(RST = '1') then
+				RESET <= '0';
+				NMI <= '0';
+			end if;
+		end process;
 
 end RTL;
 

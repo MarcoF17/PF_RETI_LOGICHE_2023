@@ -15,7 +15,7 @@ end T_FLIPFLOP_WITH_ENA;
 architecture RTL of T_FLIPFLOP_WITH_ENA is
 	signal QINTERNAL: std_logic;
 begin
-	ff: process(CLK, RST)
+	ff: process(CLK, RST, E)
 		begin
 			if(RST = '1') then
 				QINTERNAL <= '0';

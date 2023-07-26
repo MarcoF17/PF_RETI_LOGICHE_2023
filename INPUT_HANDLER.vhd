@@ -26,7 +26,7 @@ architecture Behavioral of INPUT_HANDLER is
 	signal T_FF_ENABLE: std_logic;
 	signal E: std_logic_vector(3 downto 0);
 	signal STEMP: std_logic;
-	--signal SINVTEMP: std_logic;
+	signal SINVTEMP: std_logic;
 
 	
 	component DEMUX_1_4 is
@@ -118,13 +118,13 @@ begin
 		RST => RST,
 		CLK => CLK,
 		Q => T_FF_ENABLE,
-		E => not T_FF_ENABLE,--SINVTEMP,
+		E => SINVTEMP,
 		T => STEMP
 	);
 	
 	IS_STARTED <= T_FF_ENABLE;
 	
-	p: process
+	p: process(E, T_FF_ENABLE, COMMAND)
 		begin
 			ENABLE(0) <= E(0) and (not T_FF_ENABLE);
 			ENABLE(1) <= E(1) and (not T_FF_ENABLE);
@@ -133,7 +133,7 @@ begin
 			
 			STEMP <= (not COMMAND(0)) and (not COMMAND(1)) and (COMMAND(2));
 			
-			--SINVTEMP <= (not T_FF_ENABLE);
+			SINVTEMP <= (not T_FF_ENABLE);
 		end process;
 
 end Behavioral;

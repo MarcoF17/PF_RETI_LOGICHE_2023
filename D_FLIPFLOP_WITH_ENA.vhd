@@ -16,10 +16,10 @@ end D_FLIPFLOP_WITH_ENA;
 architecture RTL of D_FLIPFLOP_WITH_ENA is
 
 begin
-	ff: process(CLK, RST)
+	ff: process(CLK, RST, ENABLE)
 		begin
 			if(RST = '1') then
-				Q <= (others => '0');
+				Q <= (others => '-');
 			else
 				if(ENABLE = '1') then
 					if(CLK'event and CLK = '1') then
