@@ -10,7 +10,8 @@ entity WATCHDOG is
 		RST: in std_logic;
 		CLEAR: in std_logic;
 		NMI: out std_logic;
-		RESET: out std_logic
+		RESET: out std_logic;
+		COUNT: out std_logic_vector(15 downto 0)
 	);
 end WATCHDOG;
 
@@ -83,7 +84,7 @@ begin
 		IS_STARTED => COUNTER_ENABLE
 	);
 	
-
+	COUNT <= COUNTER_OUT;
 
 	COUNTER_VERIFY: process(COUNTER_OUT, CLEAR, TOUT)
 		begin
@@ -93,29 +94,16 @@ begin
 				TIN <= '0';
 			end if;
 			
-			if(STNMI = COUNTER_OUT) then
+			if(STNMI = COUNTER_OUT and COUNTER_ENABLE = '1') then
 				NMI <= '1';
 			else
 				NMI <= '0';
 			end if;
 			
-			if(STWMAX = COUNTER_OUT) then
+			if(COUNTER_ENABLE = '1' and ((CLEAR = '1' and TOUT = '0') or (STWMAX = COUNTER_OUT))) then
 				RESET <= '1';
 			else
-				if(CLEAR = '1' and TOUT = '0') then
-					RESET <= '1';
-				else
-					RESET <= '0';
-				end if;
-			end if;
-		end process;
-		
-				
-	INIT_RST: process(RST)
-		begin
-			if(RST = '1') then
 				RESET <= '0';
-				NMI <= '0';
 			end if;
 		end process;
 

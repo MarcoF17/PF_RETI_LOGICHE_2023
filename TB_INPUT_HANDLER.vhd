@@ -19,7 +19,8 @@ ARCHITECTURE behavior OF TB_INPUT_HANDLER IS
          TWMAX : OUT  std_logic_vector(15 downto 0);
          TNMI : OUT  std_logic_vector(15 downto 0);
          CLK : IN  std_logic;
-         RST : IN  std_logic
+         RST : IN  std_logic;
+			IS_STARTED : OUT std_logic
         );
     END COMPONENT;
     
@@ -35,6 +36,7 @@ ARCHITECTURE behavior OF TB_INPUT_HANDLER IS
    signal TWMIN : std_logic_vector(15 downto 0);
    signal TWMAX : std_logic_vector(15 downto 0);
    signal TNMI : std_logic_vector(15 downto 0);
+	signal IS_STARTED : std_logic;
 
    -- Clock period definitions
    constant CLK_period : time := 10 ns;
@@ -50,7 +52,8 @@ BEGIN
           TWMAX => TWMAX,
           TNMI => TNMI,
           CLK => CLK,
-          RST => RST
+          RST => RST,
+			 IS_STARTED => IS_STARTED
         );
 
    -- Clock process definitions
