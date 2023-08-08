@@ -106,6 +106,6 @@ begin
 				RESET <= '0';
 			end if;
 		end process;
-
+		
 end RTL;
 

@@ -10,23 +10,25 @@ ARCHITECTURE behavior OF TB_D_FLIPFLOP IS
  
     -- Component Declaration for the Unit Under Test (UUT)
  
-    COMPONENT D_FLIPFLOP
+    COMPONENT D_FLIPFLOP_10BIT
     PORT(
-         D : IN  std_logic_vector(15 downto 0);
-         Q : OUT  std_logic_vector(15 downto 0);
+         D : IN  std_logic_vector(9 downto 0);
+         Q : OUT  std_logic_vector(9 downto 0);
          CLK : IN  std_logic;
-         RST : IN  std_logic
+         RST : IN  std_logic;
+			ENABLE : IN std_logic
         );
     END COMPONENT;
     
 
    --Inputs
-   signal D : std_logic_vector(15 downto 0);
+   signal D : std_logic_vector(9 downto 0);
    signal CLK : std_logic;
    signal RST : std_logic;
+	signal ENABLE : std_logic;
 
  	--Outputs
-   signal Q : std_logic_vector(15 downto 0);
+   signal Q : std_logic_vector(9 downto 0);
 
    -- Clock period definitions
    constant CLK_period : time := 10 ns;
@@ -34,11 +36,12 @@ ARCHITECTURE behavior OF TB_D_FLIPFLOP IS
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
-   uut: D_FLIPFLOP PORT MAP (
+   uut: D_FLIPFLOP_10BIT PORT MAP (
           D => D,
           Q => Q,
           CLK => CLK,
-          RST => RST
+          RST => RST,
+			 ENABLE => ENABLE
         );
 
    -- Clock process definitions
@@ -53,14 +56,20 @@ BEGIN
 
    -- Stimulus process
    stim_proc: process
-   begin		
+   begin
+
+		RST <= '1';
+		ENABLE <= '0';
+		
       wait for 105 ns;	
 		
-		D <= "0101010101010101";
+		RST <= '0';
+		D <= "0101010101";
 
-      wait for 20 ns;
+      wait for 15 ns;
 		
-		D <= "1111111111111110";
+		ENABLE <= '1';
+		D <= "1111111110";
 
       -- insert stimulus here 
 
