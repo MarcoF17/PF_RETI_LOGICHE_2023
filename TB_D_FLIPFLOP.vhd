@@ -12,11 +12,11 @@ ARCHITECTURE behavior OF TB_D_FLIPFLOP IS
  
     COMPONENT D_FLIPFLOP_10BIT
     PORT(
-         D : IN  std_logic_vector(9 downto 0);
-         Q : OUT  std_logic_vector(9 downto 0);
-         CLK : IN  std_logic;
-         RST : IN  std_logic;
-			ENABLE : IN std_logic
+         D: in std_logic_vector(9 downto 0);
+			Q: out std_logic_vector(9 downto 0);
+			CLK: in std_logic;
+			RST: in std_logic;
+			ENABLE: in std_logic
         );
     END COMPONENT;
     
