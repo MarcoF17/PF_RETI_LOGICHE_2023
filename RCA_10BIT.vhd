@@ -34,14 +34,14 @@ architecture RTL of RCA_10BIT is
 			S => S(0)
 		);
 		
-	GEN: for I in 1 to 9 generate
-		U: HA port map(
-			X => X(I),
-			Y => C(I-1),
-			C => C(I),
-			S => S(I)
-		);
-	end generate GEN;
+		GEN: for I in 1 to 9 generate
+			U: HA port map(
+				X => X(I),
+				Y => C(I-1),
+				C => C(I),
+				S => S(I)
+			);
+		end generate GEN;
 	
 	COUT <= C(9);
 

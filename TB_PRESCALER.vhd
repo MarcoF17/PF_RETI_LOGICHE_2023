@@ -12,20 +12,21 @@ ARCHITECTURE behavior OF TB_PRESCALER IS
  
     COMPONENT PRESCALER
     PORT(
-         CLK : IN  std_logic;
-         RST : IN  std_logic;
-         DOUT : OUT  std_logic_vector(9 downto 0);
-			CLK_BASE : OUT std_logic
+		CLK_IN: in std_logic;
+		CLK_BASE_OUT: out std_logic;
+		CLK_DIVIDED_OUT: out std_logic_vector(9 downto 0);
+		RST: in std_logic
         );
     END COMPONENT;
     
 
    --Inputs
-   signal CLK : std_logic := '0';
+   signal CLK_IN : std_logic := '0';
    signal RST : std_logic := '0';
 
  	--Outputs
-   signal DOUT : std_logic_vector(9 downto 0);
+   signal CLK_DIVIDED_OUT: std_logic_vector(9 downto 0);
+	signal CLK_BASE_OUT: std_logic;
 
    -- Clock period definitions
    constant CLK_period : time := 10 ns;
@@ -34,18 +35,18 @@ BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
    uut: PRESCALER PORT MAP (
-          CLK => CLK,
+          CLK_IN => CLK_IN,
           RST => RST,
-          DOUT => DOUT,
-			 CLK_BASE => CLK
+          CLK_DIVIDED_OUT => CLK_DIVIDED_OUT,
+			 CLK_BASE_OUT => CLK_BASE_OUT
         );
 
    -- Clock process definitions
    CLK_process :process
    begin
-		CLK <= '0';
+		CLK_IN <= '0';
 		wait for CLK_period/2;
-		CLK <= '1';
+		CLK_IN <= '1';
 		wait for CLK_period/2;
    end process;
  

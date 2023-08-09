@@ -7,23 +7,20 @@ entity D_FLIPFLOP_10BIT is
 		D: in std_logic_vector(9 downto 0);
 		Q: out std_logic_vector(9 downto 0);
 		CLK: in std_logic;
-		RST: in std_logic;
-		ENABLE: in std_logic
+		RST: in std_logic
 	);
 end D_FLIPFLOP_10BIT;
 
 architecture RTL of D_FLIPFLOP_10BIT is
 
 begin
-	ffd: process(CLK, RST, ENABLE)
+	ffd: process(CLK, RST)
 		begin
 			if(RST = '1') then
 				Q <= (others => '0');
 			else
-				if(ENABLE = '1') then
-					if(CLK'event and CLK = '1') then
-						Q <= D;
-					end if;
+				if(CLK'event and CLK = '1') then
+					Q <= D;
 				end if;
 			end if;
 		end process;

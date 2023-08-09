@@ -4,10 +4,10 @@ use ieee.std_logic_1164.all;
 
 entity PRESCALER is
 	port(
-		CLK: in std_logic;
-		RST: in std_logic;
-		DOUT: out std_logic_vector(9 downto 0);
-		ENABLE: in std_logic
+		CLK_IN: in std_logic;
+		CLK_BASE_OUT: out std_logic;
+		CLK_DIVIDED_OUT: out std_logic_vector(9 downto 0);
+		RST: in std_logic
 	);
 end PRESCALER;
 
@@ -26,36 +26,57 @@ architecture RTL of PRESCALER is
 			D: in std_logic_vector(9 downto 0);
 			Q: out std_logic_vector(9 downto 0);
 			CLK: in std_logic;
-			RST: in std_logic;
-			ENABLE: in std_logic
+			RST: in std_logic
+		);
+	end component;
+	
+	component MUX2 is
+		port(
+			A: in std_logic_vector(9 downto 0);
+			B: in std_logic_vector(9 downto 0);
+			S: in std_logic;
+			Y: out std_logic_vector(9 downto 0)
 		);
 	end component;
 	
 	signal TDOUT: std_logic_vector(9 downto 0);
 	signal TLOOP: std_logic_vector(9 downto 0);
-
+	signal TO_MUXA: std_logic_vector(9 downto 0);
+	signal TO_MUXB: std_logic_vector(9 downto 0);
+	signal MUX_CONTROL: std_logic;
+	
 begin
-	U0: RCA_10BIT port map(
+	URCA: RCA_10BIT port map(
 		X => TDOUT,
-		S => TLOOP
+		S => TO_MUXA
 	);
 	
-	U1: D_FLIPFLOP_10BIT port map(
+	UFF: D_FLIPFLOP_10BIT port map(
 		D => TLOOP,
 		Q => TDOUT,
-		CLK => CLK,
-		RST => RST,
-		ENABLE => ENABLE
+		CLK => CLK_IN,
+		RST => RST
 	);
 	
-	DOUT <= TDOUT;
+	UMUX: MUX2 port map(
+		A => TO_MUXA,
+		B => TO_MUXB,
+		S => MUX_CONTROL,
+		Y => TLOOP
+	);
+		
+	CLK_BASE_OUT <= CLK_IN;
+	CLK_DIVIDED_OUT <= TDOUT;
 	
-	--reset_process: process(RST)
-		--begin
-			--if(RST = '1') then
-				--DOUT <= (others => '0');
-			--end if;
-		--end process;
+	p: process(TDOUT)
+		begin
+			if(TDOUT = "1111111111") then
+				MUX_CONTROL <= '1';
+			else
+				MUX_CONTROL <= '0';
+			end if;
+		end process;
+
 end RTL;
 
 

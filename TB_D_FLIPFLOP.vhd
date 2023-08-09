@@ -15,8 +15,7 @@ ARCHITECTURE behavior OF TB_D_FLIPFLOP IS
          D: in std_logic_vector(9 downto 0);
 			Q: out std_logic_vector(9 downto 0);
 			CLK: in std_logic;
-			RST: in std_logic;
-			ENABLE: in std_logic
+			RST: in std_logic
         );
     END COMPONENT;
     
@@ -25,13 +24,12 @@ ARCHITECTURE behavior OF TB_D_FLIPFLOP IS
    signal D : std_logic_vector(9 downto 0);
    signal CLK : std_logic;
    signal RST : std_logic;
-	signal ENABLE : std_logic;
 
  	--Outputs
    signal Q : std_logic_vector(9 downto 0);
 
    -- Clock period definitions
-   constant CLK_period : time := 10 ns;
+   constant CLK_period : time := 35 ns;
  
 BEGIN
  
@@ -40,8 +38,7 @@ BEGIN
           D => D,
           Q => Q,
           CLK => CLK,
-          RST => RST,
-			 ENABLE => ENABLE
+          RST => RST
         );
 
    -- Clock process definitions
@@ -59,16 +56,14 @@ BEGIN
    begin
 
 		RST <= '1';
-		ENABLE <= '0';
 		
       wait for 105 ns;	
 		
 		RST <= '0';
 		D <= "0101010101";
 
-      wait for 15 ns;
+      wait for 45 ns;
 		
-		ENABLE <= '1';
 		D <= "1111111110";
 
       -- insert stimulus here 
