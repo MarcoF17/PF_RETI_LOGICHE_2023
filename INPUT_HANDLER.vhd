@@ -27,6 +27,7 @@ architecture Behavioral of INPUT_HANDLER is
 	signal E: std_logic_vector(3 downto 0);
 	signal STEMP: std_logic;
 	signal SINVTEMP: std_logic;
+	--signal SPRESC: std_logic_vector(15 downto 0);
 
 	
 	component DEMUX_1_4 is
@@ -123,6 +124,7 @@ begin
 	);
 	
 	IS_STARTED <= T_FF_ENABLE;
+	--PRESC <= SPRESC;
 	
 	p: process(E, T_FF_ENABLE, COMMAND)
 		begin

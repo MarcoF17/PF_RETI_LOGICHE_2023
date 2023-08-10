@@ -67,6 +67,7 @@ begin
 		
 	CLK_BASE_OUT <= CLK_IN;
 	CLK_DIVIDED_OUT <= TDOUT;
+	TO_MUXB <= (others => '0');
 	
 	p: process(TDOUT)
 		begin

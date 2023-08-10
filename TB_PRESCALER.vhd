@@ -58,7 +58,7 @@ BEGIN
 		RST <= '1';
       wait for 100 ns;	
 		
-		RST <= '0'; 
+		RST <= '0';
 
       wait;
    end process;

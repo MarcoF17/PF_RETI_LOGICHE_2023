@@ -49,6 +49,23 @@ architecture RTL of WATCHDOG is
 		);
 	end component;
 	
+	component PRESCALER is
+		port(
+			CLK_IN: in std_logic;
+			CLK_BASE_OUT: out std_logic;
+			CLK_DIVIDED_OUT: out std_logic_vector(9 downto 0);
+			RST: in std_logic
+		);
+	end component;
+	
+	component MUX11 is
+		port(
+			DIN: in std_logic_vector(10 downto 0);
+			S: in std_logic_vector(15 downto 0);
+			Y: out std_logic
+		);
+	end component;
+	
 	signal COUNTER_ENABLE: std_logic;
 	signal COUNTER_OUT: std_logic_vector(15 downto 0);
 	signal STWMIN: std_logic_vector(15 downto 0);
@@ -56,6 +73,11 @@ architecture RTL of WATCHDOG is
 	signal STWMAX: std_logic_vector(15 downto 0);
 	signal TOUT: std_logic;
 	signal TIN: std_logic;
+	--signal SCLK_BASE: std_logic;
+	--signal SCLK_DIVIDED: std_logic_vector(9 downto 0);
+	signal SCLK: std_logic_vector(10 downto 0);
+	signal SPRESC: std_logic_vector(15 downto 0);
+	signal CLK_FROM_PRESCALER: std_logic;
 
 begin
 
@@ -67,7 +89,7 @@ begin
 	);
 		
 	UCOUNTER: COUNTER_16BIT port map(
-		CLK => CLK,
+		CLK => CLK_FROM_PRESCALER,
 		RST => RST,
 		ENABLE => COUNTER_ENABLE,
 		DOUT => COUNTER_OUT
@@ -81,8 +103,22 @@ begin
 		TWMIN => STWMIN,
 		TWMAX => STWMAX,
 		TNMI => STNMI,
-		IS_STARTED => COUNTER_ENABLE
+		IS_STARTED => COUNTER_ENABLE,
+		PRESC => SPRESC
 	);
+
+	UPRESC: PRESCALER port map(
+		CLK_IN => CLK,
+		CLK_BASE_OUT => SCLK(0),
+		CLK_DIVIDED_OUT => SCLK(10 downto 1),
+		RST => RST
+	);
+	
+	UMUX11: MUX11 port map(
+		DIN => SCLK,
+		S => SPRESC,
+		Y => CLK_FROM_PRESCALER
+	);	
 	
 	COUNT <= COUNTER_OUT;
 
