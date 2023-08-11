@@ -17,8 +17,7 @@ ARCHITECTURE behavior OF TB_WATCHDOG IS
          RST : IN  std_logic;
          CLEAR : IN  std_logic;
          NMI : OUT  std_logic;
-         RESET : OUT  std_logic;
-			COUNT : OUT std_logic_vector(15 downto 0)
+         RESET : OUT  std_logic
 		);
     END COMPONENT;
     
@@ -33,7 +32,6 @@ ARCHITECTURE behavior OF TB_WATCHDOG IS
  	--Outputs
    signal NMI : std_logic;
    signal RESET : std_logic;
-	signal COUNT : std_logic_vector(15 downto 0);
 
    -- Clock period definitions
    constant CLK_period : time := 10 ns;
@@ -48,8 +46,7 @@ BEGIN
           RST => RST,
           CLEAR => CLEAR,
           NMI => NMI,
-          RESET => RESET,
-			 COUNT => COUNT
+          RESET => RESET
 		 );
 
    -- Clock process definitions
@@ -94,11 +91,17 @@ BEGIN
 		
 		wait for 20 ns;
 		
+		COMMAND <= "000";
+		wait for 5 ns;
+		DATA <= "0000000000000001";
+		
+		wait for 20 ns;
+		
 		COMMAND <= "100";
 		
 		wait for 100 ns;
 		
-		CLEAR <= '1';
+		--CLEAR <= '1';
 
       -- insert stimulus here 
 

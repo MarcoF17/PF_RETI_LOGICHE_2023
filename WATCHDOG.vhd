@@ -10,8 +10,7 @@ entity WATCHDOG is
 		RST: in std_logic;
 		CLEAR: in std_logic;
 		NMI: out std_logic;
-		RESET: out std_logic;
-		COUNT: out std_logic_vector(15 downto 0)
+		RESET: out std_logic
 	);
 end WATCHDOG;
 
@@ -120,8 +119,6 @@ begin
 		Y => CLK_FROM_PRESCALER
 	);	
 	
-	COUNT <= COUNTER_OUT;
-
 	COUNTER_VERIFY: process(COUNTER_OUT, CLEAR, TOUT)
 		begin
 			if(STWMIN = COUNTER_OUT) then
