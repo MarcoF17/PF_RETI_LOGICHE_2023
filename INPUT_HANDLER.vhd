@@ -12,7 +12,8 @@ entity INPUT_HANDLER is
 		TNMI: out std_logic_vector(15 downto 0);
 		CLK: in std_logic;
 		RST: in std_logic;
-		IS_STARTED: out std_logic
+		IS_STARTED: out std_logic;
+		ERR: in std_logic
 	);
 end INPUT_HANDLER;
 
@@ -64,7 +65,8 @@ architecture Behavioral of INPUT_HANDLER is
 			Q: out std_logic;
 			E: in std_logic;
 			CLK: in std_logic;
-			RST: in std_logic
+			RST: in std_logic;
+			CLR: in std_logic
 		);
 	end component;
 		
@@ -120,7 +122,8 @@ begin
 		CLK => CLK,
 		Q => T_FF_ENABLE,
 		E => SINVTEMP,
-		T => STEMP
+		T => STEMP,
+		CLR => ERR
 	);
 	
 	IS_STARTED <= T_FF_ENABLE;
@@ -137,6 +140,6 @@ begin
 			
 			SINVTEMP <= (not T_FF_ENABLE);
 		end process;
-
+		
 end Behavioral;
 

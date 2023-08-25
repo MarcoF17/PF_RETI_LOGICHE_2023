@@ -7,7 +7,8 @@ entity COUNTER_16BIT is
 		CLK: in std_logic;
 		RST: in std_logic;
 		DOUT: out std_logic_vector(15 downto 0);
-		ENABLE: in std_logic
+		ENABLE: in std_logic;
+		CLR: in std_logic
 	);
 end COUNTER_16BIT;
 
@@ -33,6 +34,7 @@ architecture RTL of COUNTER_16BIT is
 	
 	signal TDOUT: std_logic_vector(15 downto 0);
 	signal TLOOP: std_logic_vector(15 downto 0);
+	signal NEW_COUNT: std_logic;
 
 begin
 	U0: RCA_16BIT port map(
@@ -44,11 +46,12 @@ begin
 		D => TLOOP,
 		Q => TDOUT,
 		CLK => CLK,
-		RST => RST,
+		RST => NEW_COUNT,
 		ENABLE => ENABLE
 	);
 	
 	DOUT <= TDOUT;
+	NEW_COUNT <= RST or CLR;
 			
 end RTL;
 

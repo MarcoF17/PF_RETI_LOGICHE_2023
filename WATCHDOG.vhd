@@ -10,7 +10,8 @@ entity WATCHDOG is
 		RST: in std_logic;
 		CLEAR: in std_logic;
 		NMI: out std_logic;
-		RESET: out std_logic
+		RESET: out std_logic;
+		TEMPTOUT: out std_logic
 	);
 end WATCHDOG;
 
@@ -26,7 +27,8 @@ architecture RTL of WATCHDOG is
 			TNMI: out std_logic_vector(15 downto 0);
 			CLK: in std_logic;
 			RST: in std_logic;
-			IS_STARTED: out std_logic
+			IS_STARTED: out std_logic;
+			ERR: in std_logic
 		);
 	end component;
 	
@@ -35,16 +37,19 @@ architecture RTL of WATCHDOG is
 			CLK: in std_logic;
 			RST: in std_logic;
 			DOUT: out std_logic_vector(15 downto 0);
-			ENABLE: in std_logic
+			ENABLE: in std_logic;
+			CLR: in std_logic
 		);
 	end component;
 
-	component T_FLIPFLOP is
+	component T_FLIPFLOP_WITH_ENA is
 		port(
 			T: in std_logic;
 			Q: out std_logic;
 			RST: in std_logic;
-			CLK: in std_logic
+			CLK: in std_logic;
+			E: in std_logic;
+			CLR: in std_logic
 		);
 	end component;
 	
@@ -77,21 +82,27 @@ architecture RTL of WATCHDOG is
 	signal SCLK: std_logic_vector(10 downto 0);
 	signal SPRESC: std_logic_vector(15 downto 0);
 	signal CLK_FROM_PRESCALER: std_logic;
+	signal SRESET: std_logic;
+	signal COUNTER_CLR: std_logic;
+	signal TFF_CLR: std_logic;
 
 begin
 
-	UTFF: T_FLIPFLOP port map(
+	UTFF: T_FLIPFLOP_WITH_ENA port map(
 		T => TIN,
-		CLK => CLK,
+		CLK => CLK_FROM_PRESCALER,
 		RST => RST,
-		Q => TOUT
+		Q => TOUT,
+		E => COUNTER_ENABLE,
+		CLR => TFF_CLR
 	);
 		
 	UCOUNTER: COUNTER_16BIT port map(
 		CLK => CLK_FROM_PRESCALER,
 		RST => RST,
 		ENABLE => COUNTER_ENABLE,
-		DOUT => COUNTER_OUT
+		DOUT => COUNTER_OUT,
+		CLR => COUNTER_CLR
 	);
 	
 	UINHAND: INPUT_HANDLER port map(
@@ -103,7 +114,8 @@ begin
 		TWMAX => STWMAX,
 		TNMI => STNMI,
 		IS_STARTED => COUNTER_ENABLE,
-		PRESC => SPRESC
+		PRESC => SPRESC,
+		ERR => SRESET
 	);
 
 	UPRESC: PRESCALER port map(
@@ -119,7 +131,7 @@ begin
 		Y => CLK_FROM_PRESCALER
 	);	
 	
-	COUNTER_VERIFY: process(COUNTER_OUT, CLEAR, TOUT)
+	COUNTER_VERIFY: process(COUNTER_OUT, CLEAR, TOUT, CLK)
 		begin
 			if(STWMIN = COUNTER_OUT) then
 				TIN <= '1';
@@ -134,11 +146,16 @@ begin
 			end if;
 			
 			if(COUNTER_ENABLE = '1' and ((CLEAR = '1' and TOUT = '0') or (STWMAX = COUNTER_OUT))) then
-				RESET <= '1';
+				SRESET <= '1';
 			else
-				RESET <= '0';
+				SRESET <= '0';
 			end if;
 		end process;
+		
+		TEMPTOUT <= TOUT;
+		RESET <= SRESET;
+		COUNTER_CLR <= CLEAR and (not SRESET);
+		TFF_CLR <= SRESET or CLEAR;
 		
 end RTL;
 
