@@ -17,8 +17,8 @@ ARCHITECTURE behavior OF TB_WATCHDOG IS
          RST : IN  std_logic;
          CLEAR : IN  std_logic;
          NMI : OUT  std_logic;
-         RESET : OUT  std_logic;
-			TEMPTOUT : OUT std_logic
+         RESET : OUT  std_logic--;
+			--IS_STARTED : OUT std_logic
 		);
     END COMPONENT;
     
@@ -33,7 +33,7 @@ ARCHITECTURE behavior OF TB_WATCHDOG IS
  	--Outputs
    signal NMI : std_logic;
    signal RESET : std_logic;
-	signal TEMPTOUT : std_logic;
+	--signal IS_STARTED : std_logic;
 
    -- Clock period definitions
    constant CLK_period : time := 20 ns;
@@ -48,8 +48,8 @@ BEGIN
           RST => RST,
           CLEAR => CLEAR,
           NMI => NMI,
-          RESET => RESET,
-			 TEMPTOUT => TEMPTOUT
+          RESET => RESET--,
+			 --IS_STARTED => IS_STARTED
 		 );
 
    -- Clock process definitions
@@ -65,7 +65,7 @@ BEGIN
    -- Stimulus process
    stim_proc: process
    begin		
-      -- hold reset state for 100 ns.
+      --no clear
       
 		RST <= '1';
 		DATA <= (others => '0');
@@ -73,52 +73,92 @@ BEGIN
 		CLEAR <= '0';
 		
 		wait for 100 ns;
-		
 		RST <= '0';
-		
 		COMMAND <= "010";
 		wait for 5 ns;
-		DATA <= "0000000000001111";
-		
-		wait for 20 ns;
-		
+		DATA <= "0000000000001111";		
+		wait for 20 ns;		
 		COMMAND <= "001";
 		wait for 5 ns;
-		DATA <= "0000000000000001";
-		
-		wait for 20 ns;
-		
+		DATA <= "0000000000000001";		
+		wait for 20 ns;		
 		COMMAND <= "011";
 		wait for 5 ns;
-		DATA <= "0000000000000111";
-		
-		wait for 20 ns;
-		
+		DATA <= "0000000000000111";		
+		wait for 20 ns;		
 		COMMAND <= "000";
 		wait for 5 ns;
-		DATA <= "0000000000000001";
+		DATA <= "0000000000000001";		
+		wait for 20 ns;		
+		COMMAND <= "100";	
 		
-		wait for 20 ns;
+		wait for 700 ns;
 		
-		COMMAND <= "100";
 		
-		wait for 120 ns;
+		--clear in window
 		
-		CLEAR <= '1';
-		
-		wait for 100 ns;
-		
+		RST <= '1';
+		--DATA <= (others => '0');
+		--COMMAND <= "111";
 		CLEAR <= '0';
 		
+		wait for 100 ns;
+		RST <= '0';
+		COMMAND <= "010";
+		wait for 5 ns;
+		DATA <= "0000000000001111";		
+		wait for 20 ns;		
+		COMMAND <= "001";
+		wait for 5 ns;
+		DATA <= "0000000000000001";		
+		wait for 20 ns;		
+		COMMAND <= "011";
+		wait for 5 ns;
+		DATA <= "0000000000000111";		
+		wait for 20 ns;		
+		COMMAND <= "000";
+		wait for 5 ns;
+		DATA <= "0000000000000001";		
+		wait for 20 ns;		
+		COMMAND <= "100";
 		wait for 200 ns;
+		CLEAR <= '1';
+		wait for 33 ns;
+		CLEAR <= '0';
+
+		wait for 1000 ns;
 		
-		--CLEAR <= '1';
+		
+		--clear before window
+		
+		RST <= '1';
+		--DATA <= (others => '0');
+		--COMMAND <= "111";
+		CLEAR <= '0';
 		
 		wait for 100 ns;
-		
-		--CLEAR <= '0';
-
-      -- insert stimulus here 
+		RST <= '0';
+		COMMAND <= "010";
+		wait for 5 ns;
+		DATA <= "0000000000001111";		
+		wait for 20 ns;		
+		COMMAND <= "001";
+		wait for 5 ns;
+		DATA <= "0000000000000001";		
+		wait for 20 ns;		
+		COMMAND <= "011";
+		wait for 5 ns;
+		DATA <= "0000000000000111";		
+		wait for 20 ns;		
+		COMMAND <= "000";
+		wait for 5 ns;
+		DATA <= "0000000000000001";		
+		wait for 20 ns;		
+		COMMAND <= "100";
+		wait for 60 ns;
+		CLEAR <= '1';
+		wait for 33 ns;
+		CLEAR <= '0';
 
       wait;
    end process;

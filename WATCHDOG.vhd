@@ -10,8 +10,8 @@ entity WATCHDOG is
 		RST: in std_logic;
 		CLEAR: in std_logic;
 		NMI: out std_logic;
-		RESET: out std_logic;
-		TEMPTOUT: out std_logic
+		RESET: out std_logic--;
+		--IS_STARTED: out std_logic
 	);
 end WATCHDOG;
 
@@ -77,8 +77,6 @@ architecture RTL of WATCHDOG is
 	signal STWMAX: std_logic_vector(15 downto 0);
 	signal TOUT: std_logic;
 	signal TIN: std_logic;
-	--signal SCLK_BASE: std_logic;
-	--signal SCLK_DIVIDED: std_logic_vector(9 downto 0);
 	signal SCLK: std_logic_vector(10 downto 0);
 	signal SPRESC: std_logic_vector(15 downto 0);
 	signal CLK_FROM_PRESCALER: std_logic;
@@ -131,7 +129,7 @@ begin
 		Y => CLK_FROM_PRESCALER
 	);	
 	
-	COUNTER_VERIFY: process(COUNTER_OUT, CLEAR, TOUT, CLK)
+	COUNTER_VERIFY: process(COUNTER_OUT, CLEAR, TOUT, CLK, COUNTER_ENABLE, STWMIN, STNMI, STWMAX)
 		begin
 			if(STWMIN = COUNTER_OUT) then
 				TIN <= '1';
@@ -152,10 +150,12 @@ begin
 			end if;
 		end process;
 		
-		TEMPTOUT <= TOUT;
+		
 		RESET <= SRESET;
-		COUNTER_CLR <= CLEAR and (not SRESET);
+		--COUNTER_CLR <= CLEAR and (not SRESET);
+		COUNTER_CLR <= CLEAR;-- or SRESET;
 		TFF_CLR <= SRESET or CLEAR;
+		--IS_STARTED <= COUNTER_ENABLE;
 		
 end RTL;
 
