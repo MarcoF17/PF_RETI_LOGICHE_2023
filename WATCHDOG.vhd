@@ -10,10 +10,7 @@ entity WATCHDOG is
 		RST: in std_logic;
 		CLEAR: in std_logic;
 		NMI: out std_logic;
-		RESET: out std_logic;
-		IS_STARTED: out std_logic;
-		COUNTER: out std_logic_vector(15 downto 0);
-		TFFOUT: out std_logic
+		RESET: out std_logic
 	);
 end WATCHDOG;
 
@@ -99,14 +96,6 @@ architecture RTL of WATCHDOG is
 
 begin
 
-	UTFFCLEAR: T_FLIPFLOP port map(
-		T => CLEAR,
-		CLK => CLK,
-		CLR => '0',
-		--Q => '0',
-		RST => RST
-	);
-
 	UTFF: T_FLIPFLOP_WITH_ENA port map(
 		T => TIN,
 		CLK => CLK_FROM_PRESCALER,
@@ -171,13 +160,6 @@ begin
 				SRESET <= '0';
 			end if;
 		end process;
-		
-
-		--COUNTER_CLR <= CLEAR;-- or SRESET;
-		--TFF_CLR <= SRESET;
-		IS_STARTED <= COUNTER_ENABLE;
-		COUNTER <= COUNTER_OUT;
-		TFFOUT <= TOUT;
 		
 		RESET <= SRESET;
 		COUNTER_CLR <= CLEAR and (not SRESET);

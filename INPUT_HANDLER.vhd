@@ -121,7 +121,7 @@ begin
 		RST => RST,
 		CLK => CLK,
 		Q => T_FF_ENABLE,
-		E => '1',
+		E => SINVTEMP,
 		T => STEMP,
 		CLR => ERR
 	);
