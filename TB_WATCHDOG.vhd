@@ -133,7 +133,7 @@ BEGIN
 		COMMAND <= "111";
 		wait for 200 ns;
 		CLEAR <= '1';
-		wait for 10 ns;
+		wait for 12 ns;
 		CLEAR <= '0';
 
 		wait for 1000 ns;
@@ -165,11 +165,11 @@ BEGIN
 		DATA <= "0000000000000001";		
 		wait for 20 ns;		
 		COMMAND <= "100";
-		wait for 40 ns;
-		COMMAND <= "111";
 		wait for 20 ns;
+		COMMAND <= "111";
+		wait for 25 ns;
 		CLEAR <= '1';
-		wait for 10 ns;
+		wait for 12 ns;
 		CLEAR <= '0';
 
       wait;

@@ -49,7 +49,7 @@ architecture Behavioral of INPUT_HANDLER is
 		);
 	end component;
 	
-	component D_FLIPFLOP_FOR_IH is
+	component D_FLIPFLOP_WITH_ENA is
 		port(
 			D: in std_logic_vector(15 downto 0);
 			Q: out std_logic_vector (15 downto 0);
@@ -59,7 +59,7 @@ architecture Behavioral of INPUT_HANDLER is
 		);
 	end component;
 	
-	component T_FLIPFLOP is
+	component T_FLIPFLOP_WITH_ENA is
 		port(
 			T: in std_logic;
 			Q: out std_logic;
@@ -85,7 +85,7 @@ begin
 		DEC_OUT => E
 	);
 	
-	UPRESCALER: D_FLIPFLOP_FOR_IH port map(
+	UPRESCALER: D_FLIPFLOP_WITH_ENA port map(
 		RST => RST,
 		CLK => CLK,
 		ENABLE => ENABLE(0),
@@ -93,7 +93,7 @@ begin
 		Q => PRESC
 	);
 	
-	UTWMIN: D_FLIPFLOP_FOR_IH port map(
+	UTWMIN: D_FLIPFLOP_WITH_ENA port map(
 		RST => RST,
 		CLK => CLK,
 		ENABLE => ENABLE(1),
@@ -101,7 +101,7 @@ begin
 		Q => TWMIN
 	);
 	
-	UTWMAX: D_FLIPFLOP_FOR_IH port map(
+	UTWMAX: D_FLIPFLOP_WITH_ENA port map(
 		RST => RST,
 		CLK => CLK,
 		ENABLE => ENABLE(2),
@@ -109,7 +109,7 @@ begin
 		Q => TWMAX
 	);
 	
-	UTNMI: D_FLIPFLOP_FOR_IH port map(
+	UTNMI: D_FLIPFLOP_WITH_ENA port map(
 		RST => RST,
 		CLK => CLK,
 		ENABLE => ENABLE(3),
@@ -117,11 +117,11 @@ begin
 		Q => TNMI
 	);
 
-	UT_FF: T_FLIPFLOP port map(
+	UT_FF: T_FLIPFLOP_WITH_ENA port map(
 		RST => RST,
 		CLK => CLK,
 		Q => T_FF_ENABLE,
-		E => SINVTEMP,
+		E => '1',
 		T => STEMP,
 		CLR => ERR
 	);
