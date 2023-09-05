@@ -17,8 +17,10 @@ ARCHITECTURE behavior OF TB_WATCHDOG IS
          RST : IN  std_logic;
          CLEAR : IN  std_logic;
          NMI : OUT  std_logic;
-         RESET : OUT  std_logic--;
-			--IS_STARTED : OUT std_logic
+         RESET : OUT  std_logic;
+			IS_STARTED : OUT std_logic;
+			COUNTER : OUT std_logic_vector(15 downto 0);
+			TFFOUT : OUT std_logic
 		);
     END COMPONENT;
     
@@ -33,7 +35,9 @@ ARCHITECTURE behavior OF TB_WATCHDOG IS
  	--Outputs
    signal NMI : std_logic;
    signal RESET : std_logic;
-	--signal IS_STARTED : std_logic;
+	signal IS_STARTED : std_logic;
+	signal COUNTER_OUT : std_logic_vector(15 downto 0);
+	signal TFFOUT : std_logic;
 
    -- Clock period definitions
    constant CLK_period : time := 20 ns;
@@ -48,8 +52,10 @@ BEGIN
           RST => RST,
           CLEAR => CLEAR,
           NMI => NMI,
-          RESET => RESET--,
-			 --IS_STARTED => IS_STARTED
+          RESET => RESET,
+			 IS_STARTED => IS_STARTED,
+			 COUNTER => COUNTER_OUT,
+			 TFFOUT => TFFOUT
 		 );
 
    -- Clock process definitions
@@ -90,7 +96,9 @@ BEGIN
 		wait for 5 ns;
 		DATA <= "0000000000000001";		
 		wait for 20 ns;		
-		COMMAND <= "100";	
+		COMMAND <= "100";
+		wait for 20 ns;
+		COMMAND <= "111";
 		
 		wait for 700 ns;
 		
@@ -121,9 +129,11 @@ BEGIN
 		DATA <= "0000000000000001";		
 		wait for 20 ns;		
 		COMMAND <= "100";
+		wait for 20 ns;
+		COMMAND <= "111";
 		wait for 200 ns;
 		CLEAR <= '1';
-		wait for 33 ns;
+		wait for 10 ns;
 		CLEAR <= '0';
 
 		wait for 1000 ns;
@@ -136,7 +146,7 @@ BEGIN
 		--COMMAND <= "111";
 		CLEAR <= '0';
 		
-		wait for 100 ns;
+		wait for 200 ns;
 		RST <= '0';
 		COMMAND <= "010";
 		wait for 5 ns;
@@ -155,9 +165,11 @@ BEGIN
 		DATA <= "0000000000000001";		
 		wait for 20 ns;		
 		COMMAND <= "100";
-		wait for 60 ns;
+		wait for 40 ns;
+		COMMAND <= "111";
+		wait for 20 ns;
 		CLEAR <= '1';
-		wait for 33 ns;
+		wait for 10 ns;
 		CLEAR <= '0';
 
       wait;
