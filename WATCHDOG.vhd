@@ -41,14 +41,13 @@ architecture RTL of WATCHDOG is
 		);
 	end component;
 
-	component T_FLIPFLOP_WITH_ENA is
+	component SR_FLIPFLOP is
 		port(
-			T: in std_logic;
+			S: in std_logic;
+			R: in std_logic;
 			Q: out std_logic;
-			RST: in std_logic;
 			CLK: in std_logic;
-			E: in std_logic;
-			CLR: in std_logic
+			ENABLE: in std_logic
 		);
 	end component;
 	
@@ -69,16 +68,6 @@ architecture RTL of WATCHDOG is
 		);
 	end component;
 	
-	component T_FLIPFLOP is
-		port(
-			T: in std_logic;
-			Q: out std_logic;
-			CLK: in std_logic;
-			RST: in std_logic;
-			CLR: in std_logic
-		);
-	end component;
-	
 	signal COUNTER_ENABLE: std_logic;
 	signal COUNTER_OUT: std_logic_vector(15 downto 0);
 	signal STWMIN: std_logic_vector(15 downto 0);
@@ -91,18 +80,16 @@ architecture RTL of WATCHDOG is
 	signal CLK_FROM_PRESCALER: std_logic;
 	signal SRESET: std_logic;
 	signal COUNTER_CLR: std_logic;
-	signal TFF_CLR: std_logic;
 	signal HANDLER_CLR: std_logic;
 
 begin
 
-	UTFF: T_FLIPFLOP_WITH_ENA port map(
-		T => TIN,
+	UTFF: SR_FLIPFLOP port map(
 		CLK => CLK_FROM_PRESCALER,
-		RST => RST,
+		R => RST,
+		S => TIN,
 		Q => TOUT,
-		E => COUNTER_ENABLE,
-		CLR => TFF_CLR
+		ENABLE => COUNTER_ENABLE
 	);
 		
 	UCOUNTER: COUNTER_16BIT port map(
@@ -154,7 +141,6 @@ begin
 			end if;
 			
 			if(COUNTER_ENABLE = '1' and ((CLEAR = '1' and TOUT = '0') or (STWMAX = COUNTER_OUT))) then
-			--if((CLEAR = '1' and TOUT = '0') or (STWMAX = COUNTER_OUT)) then
 				SRESET <= '1';
 			else
 				SRESET <= '0';
@@ -163,7 +149,6 @@ begin
 		
 		RESET <= SRESET;
 		COUNTER_CLR <= CLEAR and (not SRESET);
-		TFF_CLR <= SRESET or CLEAR;
 		
 end RTL;
 

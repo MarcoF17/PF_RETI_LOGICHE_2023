@@ -23,6 +23,9 @@ architecture RTL of COUNTER_16BIT is
 	end component;
 	
 	component D_FLIPFLOP_WITH_ENA is
+		generic(
+			N: integer
+		);
 		port(
 			D: in std_logic_vector(15 downto 0);
 			Q: out std_logic_vector (15 downto 0);
@@ -34,7 +37,7 @@ architecture RTL of COUNTER_16BIT is
 	
 	signal TDOUT: std_logic_vector(15 downto 0);
 	signal TLOOP: std_logic_vector(15 downto 0);
-	signal NEW_COUNT: std_logic;
+	--signal NEW_COUNT: std_logic;
 
 begin
 	U0: RCA_16BIT port map(
@@ -42,16 +45,20 @@ begin
 		S => TLOOP
 	);
 	
-	U1: D_FLIPFLOP_WITH_ENA port map(
+	U1: D_FLIPFLOP_WITH_ENA 
+	generic map(
+		N => 16
+	)
+	port map(
 		D => TLOOP,
 		Q => TDOUT,
 		CLK => CLK,
-		RST => NEW_COUNT,
+		RST => RST,
 		ENABLE => ENABLE
 	);
 	
 	DOUT <= TDOUT;
-	NEW_COUNT <= RST or CLR;
+	--NEW_COUNT <= RST;-- or CLR;
 			
 end RTL;
 

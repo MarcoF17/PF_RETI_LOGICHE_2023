@@ -19,28 +19,13 @@ end INPUT_HANDLER;
 
 architecture Behavioral of INPUT_HANDLER is
 	
-	signal TO_PS: std_logic_vector(15 downto 0);
-	signal TO_TWMIN: std_logic_vector(15 downto 0);
-	signal TO_TWMAX: std_logic_vector(15 downto 0);
-	signal TO_TNMI: std_logic_vector(15 downto 0);
 	signal ENABLE: std_logic_vector(3 downto 0);
-	signal T_FF_ENABLE: std_logic;
+	signal IN_ENABLE: std_logic;
 	signal E: std_logic_vector(3 downto 0);
 	signal STEMP: std_logic;
 	signal SINVTEMP: std_logic;
-	--signal SPRESC: std_logic_vector(15 downto 0);
-
-	
-	component DEMUX_1_4 is
-		port(
-			DIN: in std_logic_vector(15 downto 0);
-			COMMAND: in std_logic_vector(2 downto 0);
-			TO_PS: out std_logic_vector(15 downto 0);
-			TO_TWMIN: out std_logic_vector(15 downto 0);
-			TO_TWMAX: out std_logic_vector(15 downto 0);
-			TO_TNMI: out std_logic_vector(15 downto 0)
-		);
-	end component;
+	signal SDATA: std_logic_vector(15 downto 0);
+	signal SCOMMAND: std_logic_vector(2 downto 0);
 	
 	component DECODER_3BIT is
 		port(
@@ -50,95 +35,127 @@ architecture Behavioral of INPUT_HANDLER is
 	end component;
 	
 	component D_FLIPFLOP_WITH_ENA is
+		generic(
+			N: integer
+		);
 		port(
-			D: in std_logic_vector(15 downto 0);
-			Q: out std_logic_vector (15 downto 0);
+			D: in std_logic_vector(N-1 downto 0);
+			Q: out std_logic_vector (N-1 downto 0);
 			CLK: in std_logic;
 			RST: in std_logic;
 			ENABLE: in std_logic
 		);
 	end component;
 	
-	component T_FLIPFLOP_WITH_ENA is
+	component SR_FLIPFLOP is
 		port(
-			T: in std_logic;
+			S: in std_logic;
+			R: in std_logic;
 			Q: out std_logic;
-			E: in std_logic;
 			CLK: in std_logic;
-			RST: in std_logic;
-			CLR: in std_logic
+			ENABLE: in std_logic
 		);
 	end component;
 		
 begin
-	UDEMUX: DEMUX_1_4 port map(
-		DIN => DATA,
-		COMMAND => COMMAND,
-		TO_PS => TO_PS,
-		TO_TWMIN => TO_TWMIN,
-		TO_TWMAX => TO_TWMAX,
-		TO_TNMI => TO_TNMI
-	);
 				
 	UDECODER: DECODER_3BIT port map(
-		COMMAND => COMMAND,
+		COMMAND => SCOMMAND,
 		DEC_OUT => E
 	);
 	
-	UPRESCALER: D_FLIPFLOP_WITH_ENA port map(
+	UPRESCALER: D_FLIPFLOP_WITH_ENA
+	generic map(
+		N => 16
+	)
+	port map(
 		RST => RST,
 		CLK => CLK,
 		ENABLE => ENABLE(0),
-		D => TO_PS,
+		D => SDATA,
 		Q => PRESC
 	);
 	
-	UTWMIN: D_FLIPFLOP_WITH_ENA port map(
+	UTWMIN: D_FLIPFLOP_WITH_ENA
+	generic map(
+		N => 16
+	)
+	port map(
 		RST => RST,
 		CLK => CLK,
 		ENABLE => ENABLE(1),
-		D => TO_TWMIN,
+		D => SDATA,
 		Q => TWMIN
 	);
 	
-	UTWMAX: D_FLIPFLOP_WITH_ENA port map(
+	UTWMAX: D_FLIPFLOP_WITH_ENA 
+	generic map(
+		N => 16
+	)
+	port map(
 		RST => RST,
 		CLK => CLK,
 		ENABLE => ENABLE(2),
-		D => TO_TWMAX,
+		D => SDATA,
 		Q => TWMAX
 	);
 	
-	UTNMI: D_FLIPFLOP_WITH_ENA port map(
+	UTNMI: D_FLIPFLOP_WITH_ENA
+	generic map(
+		N => 16
+	)
+	port map(
 		RST => RST,
 		CLK => CLK,
 		ENABLE => ENABLE(3),
-		D => TO_TNMI,
+		D => SDATA,
 		Q => TNMI
 	);
 
-	UT_FF: T_FLIPFLOP_WITH_ENA port map(
-		RST => RST,
+	UT_FF: SR_FLIPFLOP port map(
+		R => RST,
 		CLK => CLK,
-		Q => T_FF_ENABLE,
-		E => SINVTEMP,
-		T => STEMP,
-		CLR => ERR
+		Q => IN_ENABLE,
+		S => STEMP,
+		ENABLE => '1'
 	);
 	
-	IS_STARTED <= T_FF_ENABLE;
-	--PRESC <= SPRESC;
+	UDATA: D_FLIPFLOP_WITH_ENA
+	generic map(
+		N => 16
+	)
+	port map(
+		D => DATA,
+		Q => SDATA,
+		CLK => CLK,
+		RST => RST,
+		ENABLE => SINVTEMP
+	);
 	
-	p: process(E, T_FF_ENABLE, COMMAND)
+	UCOMMAND: D_FLIPFLOP_WITH_ENA
+	generic map(
+		N => 3
+	)
+	port map(
+		D => COMMAND,
+		Q => SCOMMAND,
+		CLK => CLK,
+		RST => RST,
+		ENABLE => SINVTEMP
+	);
+	
+	IS_STARTED <= IN_ENABLE;
+	
+	p: process(E, IN_ENABLE, COMMAND)
 		begin
-			ENABLE(0) <= E(0) and (not T_FF_ENABLE);
-			ENABLE(1) <= E(1) and (not T_FF_ENABLE);
-			ENABLE(2) <= E(2) and (not T_FF_ENABLE);
-			ENABLE(3) <= E(3) and (not T_FF_ENABLE);
+			ENABLE(0) <= E(0) and (not IN_ENABLE);
+			ENABLE(1) <= E(1) and (not IN_ENABLE);
+			ENABLE(2) <= E(2) and (not IN_ENABLE);
+			ENABLE(3) <= E(3) and (not IN_ENABLE);
 			
-			STEMP <= (not COMMAND(0)) and (not COMMAND(1)) and (COMMAND(2));
+			STEMP <= (not SCOMMAND(0)) and (not SCOMMAND(1)) and (SCOMMAND(2));
 			
-			SINVTEMP <= (not T_FF_ENABLE);
+			SINVTEMP <= (not IN_ENABLE);
 		end process;
 		
 end Behavioral;
