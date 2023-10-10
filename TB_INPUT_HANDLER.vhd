@@ -74,34 +74,22 @@ BEGIN
       wait for 100 ns;	
 		
 		RST <= '0';		
-		COMMAND <= "000";
-		
-		wait for 5 ns;
-		
+		COMMAND <= "000";		
 		DATA <= "0011001100110011";
 
       wait for 50 ns;
 		
 		COMMAND <= "001";
-		
-		wait for 5 ns;
-		
 		DATA <= "0000000000000001";
 		
 		wait for 50 ns;
 		
 		COMMAND <= "010";
-		
-		wait for 5 ns;
-		
 		DATA <= "1111111100000000";
 		
 		wait for 50 ns;
 		
 		COMMAND <= "011";
-		
-		wait for 5 ns;
-		
 		DATA <= "1010101010101010";
 		
 		wait for 50 ns;

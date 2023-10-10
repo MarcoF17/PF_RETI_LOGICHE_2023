@@ -13,7 +13,8 @@ entity INPUT_HANDLER is
 		CLK: in std_logic;
 		RST: in std_logic;
 		IS_STARTED: out std_logic;
-		ERR: in std_logic
+		ERR: in std_logic;
+		CLK_ENABLE: in std_logic
 	);
 end INPUT_HANDLER;
 
@@ -26,7 +27,7 @@ architecture Behavioral of INPUT_HANDLER is
 	signal SINVTEMP: std_logic;
 	signal SDATA: std_logic_vector(15 downto 0);
 	signal SCOMMAND: std_logic_vector(2 downto 0);
-	
+		
 	component DECODER_3BIT is
 		port(
 			COMMAND: in std_logic_vector(2 downto 0);
@@ -52,13 +53,11 @@ architecture Behavioral of INPUT_HANDLER is
 			S: in std_logic;
 			R: in std_logic;
 			Q: out std_logic;
-			CLK: in std_logic;
-			ENABLE: in std_logic
+			CLK: in std_logic
 		);
 	end component;
 		
 begin
-				
 	UDECODER: DECODER_3BIT port map(
 		COMMAND => SCOMMAND,
 		DEC_OUT => E
@@ -112,12 +111,11 @@ begin
 		Q => TNMI
 	);
 
-	UT_FF: SR_FLIPFLOP port map(
-		R => RST,
+	USR_FF: SR_FLIPFLOP port map(
+		R => RST or ERR,
 		CLK => CLK,
 		Q => IN_ENABLE,
-		S => STEMP,
-		ENABLE => '1'
+		S => STEMP
 	);
 	
 	UDATA: D_FLIPFLOP_WITH_ENA
@@ -141,17 +139,17 @@ begin
 		Q => SCOMMAND,
 		CLK => CLK,
 		RST => RST,
-		ENABLE => SINVTEMP
+		ENABLE => '1'
 	);
 	
 	IS_STARTED <= IN_ENABLE;
 	
-	p: process(E, IN_ENABLE, COMMAND)
+	p: process(E, IN_ENABLE, SCOMMAND, CLK_ENABLE)
 		begin
-			ENABLE(0) <= E(0) and (not IN_ENABLE);
-			ENABLE(1) <= E(1) and (not IN_ENABLE);
-			ENABLE(2) <= E(2) and (not IN_ENABLE);
-			ENABLE(3) <= E(3) and (not IN_ENABLE);
+			ENABLE(0) <= E(0) and (not IN_ENABLE);-- and CLK_ENABLE;
+			ENABLE(1) <= E(1) and (not IN_ENABLE);-- and CLK_ENABLE;
+			ENABLE(2) <= E(2) and (not IN_ENABLE);-- and CLK_ENABLE;
+			ENABLE(3) <= E(3) and (not IN_ENABLE);-- and CLK_ENABLE;
 			
 			STEMP <= (not SCOMMAND(0)) and (not SCOMMAND(1)) and (SCOMMAND(2));
 			

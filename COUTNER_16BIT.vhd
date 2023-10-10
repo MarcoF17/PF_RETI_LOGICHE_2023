@@ -14,7 +14,10 @@ end COUNTER_16BIT;
 
 architecture RTL of COUNTER_16BIT is
 
-	component RCA_16BIT is
+	component RCA_GENERIC is
+		generic(
+			N: integer
+		);
 		port(
 			X: in std_logic_vector(15 downto 0);
 			S: out std_logic_vector(15 downto 0);
@@ -40,7 +43,11 @@ architecture RTL of COUNTER_16BIT is
 	--signal NEW_COUNT: std_logic;
 
 begin
-	U0: RCA_16BIT port map(
+	U0: RCA_GENERIC
+	generic map(
+		N => 16
+	)
+	port map(
 		X => TDOUT,
 		S => TLOOP
 	);
@@ -53,7 +60,7 @@ begin
 		D => TLOOP,
 		Q => TDOUT,
 		CLK => CLK,
-		RST => RST,
+		RST => RST or CLR,
 		ENABLE => ENABLE
 	);
 	

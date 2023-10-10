@@ -17,7 +17,9 @@ ARCHITECTURE behavior OF TB_WATCHDOG IS
          RST : IN  std_logic;
          CLEAR : IN  std_logic;
          NMI : OUT  std_logic;
-         RESET : OUT  std_logic
+         RESET : OUT  std_logic;
+			CLK_ENABLE : OUT std_logic--;
+			--COUNTENA : OUT std_logic
 			);
     END COMPONENT;
     
@@ -32,9 +34,11 @@ ARCHITECTURE behavior OF TB_WATCHDOG IS
  	--Outputs
    signal NMI : std_logic;
    signal RESET : std_logic;
+	signal CLK_ENABLE : std_logic;
+	--signal COUNTENA: std_logic;
 
    -- Clock period definitions
-   constant CLK_period : time := 20 ns;
+   constant CLK_period : time := 10 ns;
  
 BEGIN
  
@@ -46,7 +50,9 @@ BEGIN
           RST => RST,
           CLEAR => CLEAR,
           NMI => NMI,
-          RESET => RESET
+          RESET => RESET,
+			 CLK_ENABLE => CLK_ENABLE--,
+			 --COUNTENA => COUNTENA 
 		 );
 
    -- Clock process definitions
@@ -62,7 +68,7 @@ BEGIN
    -- Stimulus process
    stim_proc: process
    begin		
-      --no clear
+      --CASE 1: 	no clear
       
 		RST <= '1';
 		DATA <= (others => '0');
@@ -72,19 +78,15 @@ BEGIN
 		wait for 100 ns;
 		RST <= '0';
 		COMMAND <= "010";
-		wait for 5 ns;
 		DATA <= "0000000000001111";		
 		wait for 20 ns;		
 		COMMAND <= "001";
-		wait for 5 ns;
 		DATA <= "0000000000000001";		
 		wait for 20 ns;		
 		COMMAND <= "011";
-		wait for 5 ns;
 		DATA <= "0000000000000111";		
 		wait for 20 ns;		
 		COMMAND <= "000";
-		wait for 5 ns;
 		DATA <= "0000000000000001";		
 		wait for 20 ns;		
 		COMMAND <= "100";
@@ -94,78 +96,63 @@ BEGIN
 		wait for 700 ns;
 		
 		
-		--clear in window
+		--CASE 2: clear in window
 		
 		RST <= '1';
-		--DATA <= (others => '0');
-		--COMMAND <= "111";
 		CLEAR <= '0';
 		
 		wait for 100 ns;
 		RST <= '0';
 		COMMAND <= "010";
-		wait for 5 ns;
 		DATA <= "0000000000001111";		
 		wait for 20 ns;		
 		COMMAND <= "001";
-		wait for 5 ns;
 		DATA <= "0000000000000001";		
 		wait for 20 ns;		
 		COMMAND <= "011";
-		wait for 5 ns;
 		DATA <= "0000000000000111";		
 		wait for 20 ns;		
 		COMMAND <= "000";
-		wait for 5 ns;
 		DATA <= "0000000000000001";		
 		wait for 20 ns;		
 		COMMAND <= "100";
 		wait for 20 ns;
 		COMMAND <= "111";
-		wait for 200 ns;
+		wait for 110 ns;
 		CLEAR <= '1';
-		wait for 12 ns;
+		wait for 10 ns;
 		CLEAR <= '0';
 
 		wait for 1000 ns;
 		
 		
-		--clear before window
+		--CASE 3: clear before window
 		
 		RST <= '1';
-		--DATA <= (others => '0');
-		--COMMAND <= "111";
 		CLEAR <= '0';
 		
 		wait for 100 ns;
 		RST <= '0';
 		COMMAND <= "010";
-		wait for 5 ns;
 		DATA <= "0000000000001111";		
 		wait for 20 ns;		
 		COMMAND <= "001";
-		wait for 5 ns;
-		DATA <= "0000000000000001";		
+		DATA <= "0000000000000110";		
 		wait for 20 ns;		
 		COMMAND <= "011";
-		wait for 5 ns;
 		DATA <= "0000000000000111";		
 		wait for 20 ns;		
 		COMMAND <= "000";
-		wait for 5 ns;
 		DATA <= "0000000000000001";		
 		wait for 20 ns;		
 		COMMAND <= "100";
 		wait for 20 ns;
 		COMMAND <= "111";
-		wait for 25 ns;
+		wait for 10 ns;
 		CLEAR <= '1';
 		wait for 12 ns;
 		CLEAR <= '0';
 		
-		wait for 50 ns;
-		RST <= '1';
-
       wait;
    end process;
 

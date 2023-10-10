@@ -10,7 +10,9 @@ entity WATCHDOG is
 		RST: in std_logic;
 		CLEAR: in std_logic;
 		NMI: out std_logic;
-		RESET: out std_logic
+		RESET: out std_logic;
+		CLK_ENABLE: out std_logic--;
+		--COUNTENA: out std_logic
 	);
 end WATCHDOG;
 
@@ -27,7 +29,8 @@ architecture RTL of WATCHDOG is
 			CLK: in std_logic;
 			RST: in std_logic;
 			IS_STARTED: out std_logic;
-			ERR: in std_logic
+			ERR: in std_logic;
+			CLK_ENABLE: in std_logic
 		);
 	end component;
 	
@@ -46,25 +49,16 @@ architecture RTL of WATCHDOG is
 			S: in std_logic;
 			R: in std_logic;
 			Q: out std_logic;
-			CLK: in std_logic;
-			ENABLE: in std_logic
+			CLK: in std_logic
 		);
 	end component;
 	
 	component PRESCALER is
 		port(
-			CLK_IN: in std_logic;
-			CLK_BASE_OUT: out std_logic;
-			CLK_DIVIDED_OUT: out std_logic_vector(9 downto 0);
+			EXP_VALUE: in std_logic_vector(3 downto 0);
+			CLK_ENABLE: out std_logic;
+			CLK: in std_logic;
 			RST: in std_logic
-		);
-	end component;
-	
-	component MUX11 is
-		port(
-			DIN: in std_logic_vector(10 downto 0);
-			S: in std_logic_vector(15 downto 0);
-			Y: out std_logic
 		);
 	end component;
 	
@@ -73,31 +67,29 @@ architecture RTL of WATCHDOG is
 	signal STWMIN: std_logic_vector(15 downto 0);
 	signal STNMI: std_logic_vector(15 downto 0);
 	signal STWMAX: std_logic_vector(15 downto 0);
-	signal TOUT: std_logic;
-	signal TIN: std_logic;
-	signal SCLK: std_logic_vector(10 downto 0);
+	signal SROUT: std_logic;
+	signal SRIN: std_logic;
 	signal SPRESC: std_logic_vector(15 downto 0);
-	signal CLK_FROM_PRESCALER: std_logic;
 	signal SRESET: std_logic;
-	signal COUNTER_CLR: std_logic;
-	signal HANDLER_CLR: std_logic;
+	signal CLK_ENA: std_logic;
+	signal SCLEAR: std_logic;
+	signal NEED_CLEAR: std_logic;
 
 begin
 
-	UTFF: SR_FLIPFLOP port map(
-		CLK => CLK_FROM_PRESCALER,
-		R => RST,
-		S => TIN,
-		Q => TOUT,
-		ENABLE => COUNTER_ENABLE
+	UFFMIN: SR_FLIPFLOP port map(
+		CLK => CLK,
+		R => RST or NEED_CLEAR,
+		S => SRIN,
+		Q => SROUT
 	);
 		
 	UCOUNTER: COUNTER_16BIT port map(
-		CLK => CLK_FROM_PRESCALER,
+		CLK => CLK,
 		RST => RST,
-		ENABLE => COUNTER_ENABLE,
+		ENABLE => COUNTER_ENABLE and CLK_ENA,
 		DOUT => COUNTER_OUT,
-		CLR => COUNTER_CLR
+		CLR => NEED_CLEAR
 	);
 	
 	UINHAND: INPUT_HANDLER port map(
@@ -110,45 +102,72 @@ begin
 		TNMI => STNMI,
 		IS_STARTED => COUNTER_ENABLE,
 		PRESC => SPRESC,
-		ERR => SRESET
+		ERR => SRESET,
+		CLK_ENABLE => CLK_ENA
 	);
 
 	UPRESC: PRESCALER port map(
-		CLK_IN => CLK,
-		CLK_BASE_OUT => SCLK(0),
-		CLK_DIVIDED_OUT => SCLK(10 downto 1),
+		EXP_VALUE => SPRESC(3 downto 0),
+		CLK_ENABLE => CLK_ENA,
+		CLK => CLK,
 		RST => RST
 	);
 	
-	UMUX11: MUX11 port map(
-		DIN => SCLK,
-		S => SPRESC,
-		Y => CLK_FROM_PRESCALER
-	);	
-	
-	COUNTER_VERIFY: process(COUNTER_OUT, CLEAR, TOUT, CLK, COUNTER_ENABLE, STWMIN, STNMI, STWMAX)
+	UFFCLEAR: SR_FLIPFLOP port map(
+		CLK => CLK,
+		R => RST or NEED_CLEAR,
+		S => CLEAR,
+		Q => SCLEAR
+	);
+		
+	PTWMIN: process(COUNTER_OUT, COUNTER_ENABLE, CLK)
 		begin
-			if(STWMIN = COUNTER_OUT) then
-				TIN <= '1';
+			if(COUNTER_ENABLE = '1') then
+				if(COUNTER_OUT = STWMIN) then
+					SRIN <= '1';
+				else
+					SRIN <= '0';
+				end if;
 			else
-				TIN <= '0';
+				SRIN <= '0';
 			end if;
-			
-			if(STNMI = COUNTER_OUT and COUNTER_ENABLE = '1') then
-				NMI <= '1';
-			else
-				NMI <= '0';
+		end process;
+		
+	PTNMI: process(COUNTER_OUT, COUNTER_ENABLE, CLK)
+		begin
+			if(COUNTER_ENABLE = '1') then
+				if(COUNTER_OUT = STNMI) then
+					NMI <= '1';
+				else
+					NMI <= '0';
+				end if;
+			--else
+				--NMI <= '0';
 			end if;
-			
-			if(COUNTER_ENABLE = '1' and ((CLEAR = '1' and TOUT = '0') or (STWMAX = COUNTER_OUT))) then
-				SRESET <= '1';
+		end process;
+		
+	PRESET: process(COUNTER_OUT, SCLEAR, CLK)
+		begin
+			if(COUNTER_ENABLE = '1') then
+				if((COUNTER_OUT = STWMAX) or (SCLEAR = '1' and SROUT = '0')) then
+					SRESET <= '1';
+				--else
+					--SRESET <= '0';
+				end if;
+				
+				if(SCLEAR = '1' and SROUT = '1') then
+					NEED_CLEAR <= '1';
+				else
+					NEED_CLEAR <= '0';
+				end if;
 			else
 				SRESET <= '0';
 			end if;
 		end process;
 		
-		RESET <= SRESET;
-		COUNTER_CLR <= CLEAR and (not SRESET);
+	RESET <= SRESET;
+	CLK_ENABLE <= CLK_ENA;
+	--COUNTENA <= COUNTER_ENABLE;
 		
 end RTL;
 

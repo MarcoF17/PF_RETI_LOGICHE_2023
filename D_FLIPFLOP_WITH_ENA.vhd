@@ -5,7 +5,7 @@ use ieee.std_logic_1164.all;
 
 entity D_FLIPFLOP_WITH_ENA is
 	generic(
-		N: integer := 16
+		N: integer := 11
 	);
 
 	port(
@@ -19,16 +19,18 @@ end D_FLIPFLOP_WITH_ENA;
 
 architecture RTL of D_FLIPFLOP_WITH_ENA is
 
+signal ALL_ZEROS: std_logic_vector(N-1 downto 0);
+
 begin
+	ALL_ZEROS <= (others => '0');
 	ff: process(CLK)
 		begin
 			if(CLK'event and CLK = '1') then
-				if(ENABLE = '1') then
-					if(RST = '1') then
-						Q <= (others => '0');
-					else
-						Q <= D;
-					end if;
+				if(RST = '1') then
+					Q <= ALL_ZEROS;
+				
+				elsif(ENABLE = '1') then
+					Q <= D;
 				end if;
 			end if;
 		end process;
